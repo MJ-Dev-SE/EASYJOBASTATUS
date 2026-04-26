@@ -94,37 +94,40 @@ export const FollowUpAssistant: React.FC = () => {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `You are a professional career coach. Generate follow-up message templates for a job application. 
+        contents: `Generate follow-up message templates for a job application.
+        Company: ${selectedApp.company_name}
+        Position: ${selectedApp.job_position}
+        Days Since Applied: ${daysSince}
+        ${revisionPrompt ? `User's Special Instructions: ${revisionPrompt}` : ''}`,
+        config: {
+          systemInstruction: `You are a professional career coach. Generate follow-up message templates for a job application.
+          
+          CRITICAL INSTRUCTION FOR CUSTOM PROMPTS:
+          If the user provides "User's Special Instructions", YOU MUST PRIORITIZE THESE OVER ALL OTHER DEFAULTS.
+          - If the instructions specify a tone for a specific section, apply it ONLY to that exactly specified section.
+          - RETAIN the default professional tone for all other templates unless specifically instructed otherwise.
+          - Ensure responses are HIGHLY SPECIFIC to the position and company.
+          - AVOID generic "I am writing to follow up" openings.
+          - INTEGRATE feedback from User's Special Instructions into the word choice.
 
-CRITICAL INSTRUCTION FOR CUSTOM PROMPTS:
-If the user provides "User's Special Instructions", YOU MUST PRIORITIZE THESE OVER ALL OTHER DEFAULTS.
-- If the instructions specify a tone for a specific section (e.g., "Make the first email sarcastic"), apply it ONLY to that exactly specified section. RESTRICT the change to that section only.
-- RETAIN the default professional tone for all other templates unless unless specifically instructed otherwise for those templates.
-- Ensure the responses are HIGHLY SPECIFIC to the position (${selectedApp.job_position}) and company (${selectedApp.company_name}). Use company-specific context where possible.
-- AVOID generic "I am writing to follow up" openings. Use more varied and engaging starting points that show personality.
-- INTEGRATE specific feedback from the user's instructions into the actual word choice of the templates.
-
-Respond ONLY in valid JSON with no markdown, using exactly these keys:
-{
-  "followup_email_1": "full email text (Day 5-7)",
-  "followup_email_2": "full email text (Day 10-14)",
-  "linkedin_message": "LinkedIn outreach text",
-  "thank_you_email": "thank you after interview text",
-  "final_closeout": "final polite close-out message"
-}
-Company: ${selectedApp.company_name}
-Position: ${selectedApp.job_position}
-Days Since Applied: ${daysSince}
-${revisionPrompt ? `User's Special Instructions: ${revisionPrompt}` : ''}`
+          Return the templates in JSON format with these exact keys:
+          - followup_email_1 (Day 5-7)
+          - followup_email_2 (Day 10-14)
+          - linkedin_message
+          - thank_you_email
+          - final_closeout`,
+          responseMimeType: "application/json"
+        }
       });
 
       const text = response.text;
       if (!text) throw new Error("No response");
-      const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      setTemplates(JSON.parse(cleanedText));
+      const parsedTemplates = JSON.parse(text);
+      setTemplates(parsedTemplates);
       toast.success('Templates generated!');
     } catch (error) {
-       toast.error('Failed to generate templates.');
+       console.error('AI Error:', error);
+       toast.error('Failed to generate templates. Please check your connection.');
     } finally {
       setLoading(false);
     }

@@ -51,20 +51,22 @@ export const CompanyResearch: React.FC = () => {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `You are a career research assistant. Research the company "${companyName}" ${locationName ? `located in or with presence in "${locationName}"` : ''} and provide helpful guidance. Respond ONLY in valid JSON with no markdown, using exactly these keys:
-{
-  "overview": { "industry": "string", "size": "string", "location": "string" },
-  "description": "2-3 sentences company overview. Mention local context if location was provided.",
-  "official_channels": "Where to find their website and careers page",
-  "legitimacy_tips": ["tip1", "tip2"],
-  "search_guidance": "How to verify this company independently"
-}`
+        contents: `Research the company "${companyName}" ${locationName ? `located in or with presence in "${locationName}"` : ''} and provide helpful guidance.`,
+        config: {
+          systemInstruction: `You are a career research assistant. Provide helpful company guidance in JSON format.
+          The JSON must include exactly these keys:
+          - overview (object with industry, size, and location strings)
+          - description (2-3 sentences company overview)
+          - official_channels (string explaining website/careers page)
+          - legitimacy_tips (array of strings)
+          - search_guidance (string explaining independent verification)`,
+          responseMimeType: "application/json"
+        }
       });
 
       const text = response.text;
       if (!text) throw new Error("No response");
-      const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const newResult = JSON.parse(cleanedText);
+      const newResult = JSON.parse(text);
       setResult(newResult);
       
       const historyItem = { ...newResult, company: companyName, location: locationName, timestamp: Date.now() };
@@ -73,7 +75,7 @@ export const CompanyResearch: React.FC = () => {
       toast.success('Research completed!');
     } catch (error) {
       console.error('AI Error:', error);
-      toast.error('Failed to get company information.');
+      toast.error('Failed to get company information. Please check your connection.');
     } finally {
       setLoading(false);
     }

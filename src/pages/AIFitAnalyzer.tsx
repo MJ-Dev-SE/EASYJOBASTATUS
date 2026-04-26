@@ -106,32 +106,32 @@ export const AIFitAnalyzer: React.FC = () => {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `You are an expert resume analyst. Analyze the resume against the job description below. Respond ONLY in valid JSON with no markdown formatting, using exactly these keys:
-{
-  "compatibility_score": number between 0 and 100,
-  "matching_skills": ["skill1", "skill2"],
-  "missing_skills": ["skill1", "skill2"],
-  "weak_areas": ["area1", "area2"],
-  "keyword_suggestions": ["keyword1", "keyword2"],
-  "skill_gap_recommendations": ["recommendation1", "recommendation2"],
-  "summary": "2-3 sentence summary"
-}
-Resume:
-${resumeText}
-
-Job Description:
-${jobDescription}`
+        contents: `Analyze the following resume against the job description.
+        Resume: ${resumeText}
+        Job Description: ${jobDescription}`,
+        config: {
+          systemInstruction: `You are an expert resume analyst. Analyze the resume against the job description provided. 
+          Return a detailed compatibility analysis in JSON format with the following keys:
+          - compatibility_score (number 0-100)
+          - matching_skills (array of strings)
+          - missing_skills (array of strings)
+          - weak_areas (array of strings)
+          - keyword_suggestions (array of strings)
+          - skill_gap_recommendations (array of strings)
+          - summary (2-3 sentence string)`,
+          responseMimeType: "application/json"
+        }
       });
 
       const text = response.text;
       if (!text) throw new Error("No response from AI");
       
-      const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      setResult(JSON.parse(cleanedText));
+      const parsedResult = JSON.parse(text);
+      setResult(parsedResult);
       toast.success('Analysis complete!');
     } catch (error) {
       console.error('AI Error:', error);
-      toast.error('Analysis failed. Please check your API key.');
+      toast.error('Analysis failed. Please check your API key and network connection.');
     } finally {
       setLoading(false);
     }

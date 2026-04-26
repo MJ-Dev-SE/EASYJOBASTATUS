@@ -40,22 +40,26 @@ export const ContactFinder: React.FC = () => {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `You are a professional recruiting assistant. Help the user find contact information for "${role}" at "${company}". Respond ONLY in valid JSON with no markdown, using exactly these keys:
-{
-  "hr_email_search": "Guide on how to find their official HR email",
-  "linkedin_search_tips": ["Exact search queries for LinkedIn"],
-  "contact_page_hint": "Likely URL pattern for their careers/contact page",
-  "professional_outreach_advice": "Tips for first outreach"
-}`
+        contents: `Help the user find contact information for "${role}" at "${company}".`,
+        config: {
+          systemInstruction: `You are a professional recruiting assistant. Provide guidance on finding contacts in JSON format.
+          The JSON must include exactly these keys:
+          - hr_email_search (Guide on finding official HR email)
+          - linkedin_search_tips (Array of exact search queries for LinkedIn)
+          - contact_page_hint (Likely URL pattern for careers page)
+          - professional_outreach_advice (Tips for first outreach)`,
+          responseMimeType: "application/json"
+        }
       });
 
       const text = response.text;
       if (!text) throw new Error("No response");
-      const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      setResult(JSON.parse(cleanedText));
+      const parsedResult = JSON.parse(text);
+      setResult(parsedResult);
       toast.success('Search guidance generated!');
     } catch (error) {
-       toast.error('Failed to generate search guidance.');
+       console.error('AI Error:', error);
+       toast.error('Failed to generate search guidance. Please check your connection.');
     } finally {
       setLoading(false);
     }
