@@ -44,7 +44,7 @@ export const Sidebar: React.FC = () => {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-lg">
             <Briefcase className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-800 font-serif">EasyJobStatus</span>
+          <span className="text-xl font-bold tracking-tight text-slate-800 font-serif">EASYJOBAISTATUS</span>
         </div>
       </div>
 

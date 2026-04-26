@@ -45,7 +45,7 @@ export const Login: React.FC = () => {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-xl">
             <Trophy className="h-7 w-7" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 font-serif">EasyJobStatus</h2>
+          <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-slate-900 font-serif">EASYJOBAISTATUS</h2>
           <p className="mt-2 text-sm text-slate-600 font-medium">Your AI-powered job search command center</p>
         </div>
 
