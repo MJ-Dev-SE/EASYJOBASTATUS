@@ -21,6 +21,12 @@
   body {
     @apply bg-[#F8FAFC] text-slate-900 font-sans;
   }
+  button,
+  [type='button'],
+  [type='reset'],
+  [type='submit'] {
+    @apply cursor-pointer;
+  }
 }
 
 .glass-card {
