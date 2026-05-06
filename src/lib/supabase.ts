@@ -6,6 +6,6 @@ const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY || '';
 
 // Only initialize if we have credentials to avoid top-level crash during deployment
 // when environment variables are not yet configured.
-export const supabase = (supabaseUrl && supabaseAnonKey) 
+export const supabase: any = (supabaseUrl && supabaseAnonKey) 
   ? createClient<Database>(supabaseUrl, supabaseAnonKey) 
   : createClient<Database>('https://placeholder.supabase.co', 'placeholder'); // placeholder to prevent crash

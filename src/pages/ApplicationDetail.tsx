@@ -22,6 +22,8 @@ import { Spinner } from '../components/ui/Spinner';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
+import { ai } from '../lib/gemini';
+
 export const ApplicationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -32,12 +34,16 @@ export const ApplicationDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [draftMessage, setDraftMessage] = useState('');
+  const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
     setLoading(true);
     
-    const [appRes, timelineRes] = await Promise.all([
+    const [appRes, timelineRes]: [any, any] = await Promise.all([
       supabase.from('job_applications').select('*').eq('id', id).single(),
       supabase.from('application_timeline').select('*').eq('application_id', id).order('created_at', { ascending: false })
     ]);
@@ -49,8 +55,49 @@ export const ApplicationDetail: React.FC = () => {
       setApp(appRes.data);
       setNotes(appRes.data.notes || '');
       setTimeline(timelineRes.data || []);
+      
+      // Get AI Suggestion
+      generateAiSuggestion(appRes.data);
     }
     setLoading(false);
+  };
+
+  const generateAiSuggestion = async (application: JobApplication) => {
+    setLoadingAi(true);
+    try {
+      const prompt = `Given a job application for "${application.job_position}" at "${application.company_name}" with status "${application.status}" applied on ${application.application_date}. Today is ${new Date().toLocaleDateString()}. What is the single most important next step? Provide a short, actionable sentence.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt
+      });
+      setAiSuggestion(response.text || null);
+    } catch (err) {
+      console.error('AI Suggestion error:', err);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
+  const handleGenerateMessage = async (type: 'follow_up' | 'thank_you' | 'check_in') => {
+    if (!app) return;
+    setIsGeneratingMessage(true);
+    try {
+      const prompt = `Generate a professional ${type.replace('_', ' ')} email for the position "${app.job_position}" at "${app.company_name}". 
+      Status: ${app.status}. Applied on: ${app.application_date}.
+      Make it concise and compelling. Use placeholder [Name] where necessary.`;
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt
+      });
+      setDraftMessage(response.text || '');
+      toast.success('Message generated!');
+    } catch (err) {
+      console.error('AI Message error:', err);
+      toast.error('Failed to generate message');
+    } finally {
+      setIsGeneratingMessage(false);
+    }
   };
 
   useEffect(() => {
@@ -60,10 +107,10 @@ export const ApplicationDetail: React.FC = () => {
   const handleUpdateStatus = async (newStatus: ApplicationStatus) => {
     if (!app || !user) return;
     
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('job_applications')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', app.id);
+      .update({ status: newStatus, updated_at: new Date().toISOString() } as any)
+      .eq('id', app.id) as any);
 
     if (error) {
       toast.error('Failed to update status');
@@ -71,12 +118,12 @@ export const ApplicationDetail: React.FC = () => {
       toast.success(`Status updated to ${newStatus}`);
       
       // Add to timeline
-      await supabase.from('application_timeline').insert([{
+      await (supabase.from('application_timeline').insert([{
         application_id: app.id,
         user_id: user.id,
         action: 'Status Updated',
         notes: `Application moved to ${newStatus}`
-      }]);
+      }]) as any);
       
       fetchData();
     }
@@ -85,10 +132,10 @@ export const ApplicationDetail: React.FC = () => {
   const handleSaveNotes = async () => {
     if (!app) return;
     setSavingNotes(true);
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('job_applications')
-      .update({ notes })
-      .eq('id', app.id);
+      .update({ notes } as any)
+      .eq('id', app.id) as any);
     
     if (error) toast.error('Failed to save notes');
     else toast.success('Notes saved');
@@ -219,19 +266,79 @@ export const ApplicationDetail: React.FC = () => {
           </Card>
 
           {/* AI Suggestions Card */}
-          {suggestion && (
-            <div className={`mt-4 flex items-start gap-4 rounded-xl border p-4 shadow-sm ${
-              suggestion.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-              suggestion.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
-              'bg-blue-50 border-blue-200 text-blue-800'
-            }`}>
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest opacity-80">Next Action Recommendation</p>
-                <p className="mt-1 font-medium">{suggestion.text}</p>
-              </div>
+          <div className="mt-4 flex items-start gap-4 rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-sm text-blue-800">
+            {loadingAi ? (
+              <Spinner size="sm" className="mt-1" />
+            ) : (
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
+            )}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-80 flex items-center gap-2">
+                AI Next Step Recommendation
+                {loadingAi && <span className="animate-pulse">Analyzing...</span>}
+              </p>
+              <p className="mt-1 font-medium">{aiSuggestion || (loadingAi ? 'Thinking...' : 'No specific suggestion at this time.')}</p>
             </div>
-          )}
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary-500" />
+                Communication Helper
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleGenerateMessage('follow_up')}
+                  isLoading={isGeneratingMessage}
+                >
+                  Draft Follow-up
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleGenerateMessage('thank_you')}
+                  isLoading={isGeneratingMessage}
+                >
+                  Draft Thank You
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleGenerateMessage('check_in')}
+                  isLoading={isGeneratingMessage}
+                >
+                  Quick Check-in
+                </Button>
+              </div>
+
+              {draftMessage && (
+                <div className="mt-4 space-y-2 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Generated Draft</label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-xs h-7"
+                      onClick={() => {
+                        navigator.clipboard.writeText(draftMessage);
+                        toast.success('Copied to clipboard!');
+                      }}
+                    >
+                      Copy to Clipboard
+                    </Button>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm whitespace-pre-wrap text-slate-700 max-h-[300px] overflow-y-auto">
+                    {draftMessage}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Quick AI Tools Button Grid */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">

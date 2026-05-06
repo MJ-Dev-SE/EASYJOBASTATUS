@@ -56,13 +56,13 @@ export const FollowUpAssistant: React.FC = () => {
 
     setIsSubmittingFeedback(true);
     try {
-      const { error } = await supabase.from('follow_up_feedback').insert({
+      const { error } = await (supabase.from('follow_up_feedback').insert({
         user_id: user.id,
         application_id: selectedApp.id,
         original_instruction: revisionPrompt,
         feedback_text: feedbackComment,
         stars: feedbackStars,
-      });
+      } as any) as any);
 
       if (error) throw error;
 

@@ -39,13 +39,13 @@ export const Settings: React.FC = () => {
     fetchProfile();
   }, [user]);
 
-  const handleUpdateProfile = async () => {
+    const handleUpdateProfile = async () => {
     if (!user) return;
     setUpdating(true);
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('profiles')
-      .update({ full_name: fullName })
-      .eq('id', user.id);
+      .update({ full_name: fullName } as any)
+      .eq('id', user.id) as any);
 
     if (error) toast.error('Update failed');
     else {

@@ -40,11 +40,11 @@ export const useReminders = () => {
       user_id: user.id
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('reminders')
       .insert([cleanedReminder])
       .select()
-      .single();
+      .single() as any);
 
     if (error) {
       toast.error('Failed to add reminder');
@@ -60,10 +60,10 @@ export const useReminders = () => {
   };
 
   const toggleComplete = async (id: string, is_completed: boolean) => {
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('reminders')
-      .update({ is_completed: !is_completed })
-      .eq('id', id);
+      .update({ is_completed: !is_completed } as any)
+      .eq('id', id) as any);
 
     if (error) {
       toast.error('Failed to update reminder');

@@ -12,10 +12,10 @@ export const useApplications = () => {
   const fetchApplications = async () => {
     if (!user) return;
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('job_applications')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }) as any);
 
     if (error) {
       console.error('Fetch error:', error);
@@ -32,11 +32,11 @@ export const useApplications = () => {
 
   const addApplication = async (app: Omit<JobApplication, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) return;
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('job_applications')
       .insert([{ ...app, user_id: user.id }])
       .select()
-      .single();
+      .single() as any);
 
     if (error) {
       toast.error('Failed to add application');
@@ -46,12 +46,12 @@ export const useApplications = () => {
       toast.success('Application added!');
       
       // Auto-timeline entry
-      await supabase.from('application_timeline').insert([{
+      await (supabase.from('application_timeline').insert([{
         application_id: data.id,
         user_id: user.id,
         action: 'Application Created',
         notes: `Initial status: ${app.status}`
-      }]);
+      }]) as any);
       
       return data;
     }
@@ -59,10 +59,10 @@ export const useApplications = () => {
   };
 
   const updateStatus = async (id: string, status: ApplicationStatus) => {
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('job_applications')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id);
+      .update({ status, updated_at: new Date().toISOString() } as any)
+      .eq('id', id) as any);
 
     if (error) {
       toast.error('Failed to update status');
@@ -72,12 +72,12 @@ export const useApplications = () => {
       
       // Add to timeline
       if (user) {
-        await supabase.from('application_timeline').insert([{
+        await (supabase.from('application_timeline').insert([{
           application_id: id,
           user_id: user.id,
           action: 'Status Updated',
           notes: `Changed status to ${status}`
-        }]);
+        }]) as any);
       }
     }
   };
