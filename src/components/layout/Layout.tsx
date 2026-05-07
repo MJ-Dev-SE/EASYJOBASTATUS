@@ -1,26 +1,10 @@
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext';
 import { Sidebar } from './Sidebar';
 import { MobileNav } from './MobileNav';
-import { Spinner } from '../ui/Spinner';
 
 export const Layout: React.FC = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#F8FAFC]">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Sidebar />

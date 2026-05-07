@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import { Layout } from './components/layout/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
 import { Login } from './pages/auth/Login';
@@ -40,17 +41,19 @@ export default function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Protected Routes */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/applications" element={<Applications />} />
-            <Route path="/applications/:id" element={<ApplicationDetail />} />
-            <Route path="/ai-fit-analyzer" element={<AIFitAnalyzer />} />
-            <Route path="/company-research" element={<CompanyResearch />} />
-            <Route path="/contact-finder" element={<ContactFinder />} />
-            <Route path="/follow-up" element={<FollowUpAssistant />} />
-            <Route path="/reminders" element={<Reminders />} />
-            <Route path="/settings" element={<Settings />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/applications" element={<Applications />} />
+              <Route path="/applications/:id" element={<ApplicationDetail />} />
+              <Route path="/ai-fit-analyzer" element={<AIFitAnalyzer />} />
+              <Route path="/company-research" element={<CompanyResearch />} />
+              <Route path="/contact-finder" element={<ContactFinder />} />
+              <Route path="/follow-up" element={<FollowUpAssistant />} />
+              <Route path="/reminders" element={<Reminders />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
           </Route>
 
           {/* Fallback */}
