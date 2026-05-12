@@ -1,4 +1,4 @@
-# EASYJOBASTATUS 🏆
+# EASYJOBAISTATUS 🏆
 
 **Smart Job Application Tracker & AI-Powered Job Hunting Assistant**
 

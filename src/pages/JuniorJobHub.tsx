@@ -76,18 +76,20 @@ export const JuniorJobHub: React.FC = () => {
       Location context: ${phRegion ? `Focusing on ${phRegion} region/province in the Philippines.` : ''} ${location ? `Specific city/area: ${location}` : ''}
       Work requirement: ${workType !== 'all' ? workType : 'Any (Remote, Hybrid, or On-site)'}
       
-      CRITICAL SOURCING INSTRUCTIONS:
-      1. DO NOT limit to LinkedIn. Actively source from:
+      CRITICAL SOURCING & RANKING INSTRUCTIONS:
+      1. IT RELEVANCE FIRST: Prioritize technical alignment and career growth potential over pure geographic proximity. If a user's specific location has limited IT roles, do NOT suggest unrelated jobs; instead, prioritize Remote-friendly roles or positions in the nearest major IT hubs (e.g., NCR, Cebu) that offer relocation or hybrid setups.
+      2. SOURCE BREADTH: DO NOT limit to LinkedIn. Actively source from:
          - Facebook Jobs/Tech Groups (e.g., "IT Jobs Philippines", "Startup PH Jobs")
          - Startup-specific boards (Wellfound, Tech in Asia, Bossjob)
          - Company-direct career pages (e.g., GCash, Maya, Canva PH, Accenture, etc.)
          - Community tech boards and Google-indexed public posts.
-      2. PRIORITIZE these keywords: "Fresh Graduate", "Junior", "Associate", "Trainee", "0-1 years experience", "No experience required".
-      3. LINK QUALITY: The links provided MUST lead directly to the specific job application form or post, NOT a general homepage.
+      3. JUNIOR FOCUS: Prioritize these keywords: "Fresh Graduate", "Junior", "Associate", "Trainee", "0-1 years experience", "No experience required".
+      4. LINK QUALITY: The links provided MUST lead directly to the specific job application form or post, NOT a general homepage.
       
       Ranking logic:
       ${filters.startup ? '- Heavy priority to Startups and tech-first companies.' : ''}
       ${filters.noExperience ? '- Priority to roles explicitly welcoming graduates.' : ''}
+      - Multi-factor sorting: [IT Relevance] > [Junior Friendliness] > [Proximity].
       - Strict IT focus: Programming, Data, Cloud, AI, QA, Cybersecurity.
       
       Return a list of 6-8 relevant, verified job openings.`;
