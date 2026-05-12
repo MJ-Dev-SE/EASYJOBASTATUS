@@ -4,7 +4,7 @@
 
 EasyJobStatus is a comprehensive platform designed to streamline your job search. Track applications, analyze your fit for specific roles, research companies, and generate professional follow-up messages — all powered by Google Gemini AI and Supabase.
 
-## 🚀 Features
+##Features
 
 - **Dashboard**: High-level overview of your job search progress with status charts and recommended actions.
 - **Application Tracker**: Manage all your job applications with a robust filtering and status system.
@@ -15,7 +15,7 @@ EasyJobStatus is a comprehensive platform designed to streamline your job search
 - **Follow-Up Assistant**: Generate optimized email and LinkedIn templates based on your application timeline.
 - **Smart Reminders**: Never miss a follow-up or interview prep task with integrated reminders.
 
-## 🛠 Tech Stack
+##Tech Stack
 
 - **Frontend**: React 18 (Vite), TypeScript, Tailwind CSS v4.
 - **Routing**: React Router v6.
@@ -26,7 +26,7 @@ EasyJobStatus is a comprehensive platform designed to streamline your job search
 - **Forms**: React Hook Form + Zod.
 - **Notifications**: react-hot-toast.
 
-## ⚙️ Setup Instructions
+##Setup Instructions
 
 ### 1. External Requirements
 - **Supabase Project**: Create a project at [supabase.com](https://supabase.com).
@@ -58,13 +58,13 @@ npm install
 npm run dev
 ```
 
-## 📜 AI Usage Rules
+##AI Usage Rules
 - All AI outputs are framed as **guidance**, not absolute fact.
 - Disclaimers are included in Company Research and Contact Finder to encourage independent verification.
 - We promote **professional and respectful** communication; spamming recruiters is explicitly discouraged in the UI.
 
-## 📚 Planned Integrations
+##Planned Integrations
 - **READYSKILLED**: Future integration for direct learning path recommendations for identified skill gaps.
 
 ---
-*Built with ❤️ for career winners.*
+*Built for career winners.*
