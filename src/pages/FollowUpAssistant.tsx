@@ -41,6 +41,7 @@ export const FollowUpAssistant: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [revisionPrompt, setRevisionPrompt] = useState('');
   const [templates, setTemplates] = useState<FollowUpTemplates | null>(null);
+  const [refiningKey, setRefiningKey] = useState<string | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackStars, setFeedbackStars] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState('');
@@ -133,6 +134,39 @@ export const FollowUpAssistant: React.FC = () => {
     }
   };
 
+  const handleRefineTemplate = async (key: keyof FollowUpTemplates) => {
+    if (!selectedApp || !templates) return;
+    if (!revisionPrompt) {
+      toast.error('Please enter revision instructions in the text box above first.');
+      return;
+    }
+
+    setRefiningKey(key);
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Revise a specific job application follow-up template.
+        Position: ${selectedApp.job_position} @ ${selectedApp.company_name}
+        Template Category: ${key.replace(/_/g, ' ')}
+        Current Template Content: ${templates[key]}
+        Instructions for Revision: ${revisionPrompt}
+        
+        Return ONLY the revised template text. Do not include JSON formatting or markers.`,
+      });
+
+      const text = response.text;
+      if (text) {
+        setTemplates(prev => prev ? { ...prev, [key]: text.trim() } : null);
+        toast.success('Section revised!');
+      }
+    } catch (error) {
+      console.error('Refine error:', error);
+      toast.error('Failed to refine this section');
+    } finally {
+      setRefiningKey(null);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard');
@@ -187,7 +221,7 @@ export const FollowUpAssistant: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
                       <MessageSquare className="h-3 w-3" />
-                      Custom Instructions (Optional)
+                      Refinement prompt
                     </label>
                     <textarea
                       className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-300 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10 min-h-[100px]"
@@ -195,11 +229,12 @@ export const FollowUpAssistant: React.FC = () => {
                       value={revisionPrompt}
                       onChange={(e) => setRevisionPrompt(e.target.value)}
                     />
+                    <p className="text-[10px] text-slate-400 leading-tight">TIP: Use the "Refine" button on each card to apply this prompt to a specific template only.</p>
                   </div>
 
                   <Button className="w-full gap-2 h-11" onClick={handleGenerate} isLoading={loading}>
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    {templates ? 'Regenerate Strategy' : 'Generate Templates'}
+                    {templates ? 'Regenerate All' : 'Generate Templates'}
                   </Button>
                 </div>
               )}
@@ -250,8 +285,8 @@ export const FollowUpAssistant: React.FC = () => {
                     className="flex w-full items-center justify-between p-4 focus:outline-none"
                   >
                     <div className="flex items-center gap-3">
-                      <ThumbsUp className="h-5 w-5 text-primary-500" />
-                      <span className="font-bold text-slate-700">How was the AI response?</span>
+                       <ThumbsUp className="h-5 w-5 text-primary-500" />
+                       <span className="font-bold text-slate-700">How was the AI response?</span>
                     </div>
                     {feedbackOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </button>
@@ -274,7 +309,7 @@ export const FollowUpAssistant: React.FC = () => {
 
                        <textarea
                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm focus:border-primary-500 focus:outline-none min-h-[80px]"
-                         placeholder="What could be better? (e.g., 'The first email was still too formal', 'Did not follow the sarcastic prompt')"
+                         placeholder="What could be better? (e.g., 'The first email was still too formal')"
                          value={feedbackComment}
                          onChange={(e) => setFeedbackComment(e.target.value)}
                        />
@@ -292,11 +327,46 @@ export const FollowUpAssistant: React.FC = () => {
                </Card>
 
               <div className="grid grid-cols-1 gap-6">
-                <TemplateCard title="First Follow-Up (Day 5-7)" content={templates.followup_email_1} onCopy={() => copyToClipboard(templates.followup_email_1)} color="blue" />
-                <TemplateCard title="Second Follow-Up (Day 10-14)" content={templates.followup_email_2} onCopy={() => copyToClipboard(templates.followup_email_2)} color="indigo" />
-                <TemplateCard title="LinkedIn Outreach" content={templates.linkedin_message} onCopy={() => copyToClipboard(templates.linkedin_message)} color="teal" />
-                <TemplateCard title="Post-Interview Thank You" content={templates.thank_you_email} onCopy={() => copyToClipboard(templates.thank_you_email)} color="emerald" />
-                <TemplateCard title="Final Polite Close-Out" content={templates.final_closeout} onCopy={() => copyToClipboard(templates.final_closeout)} color="slate" />
+                <TemplateCard 
+                  title="First Follow-Up (Day 5-7)" 
+                  content={templates.followup_email_1} 
+                  onCopy={() => copyToClipboard(templates.followup_email_1)} 
+                  onRefine={() => handleRefineTemplate('followup_email_1')}
+                  isRefining={refiningKey === 'followup_email_1'}
+                  color="blue" 
+                />
+                <TemplateCard 
+                  title="Second Follow-Up (Day 10-14)" 
+                  content={templates.followup_email_2} 
+                  onCopy={() => copyToClipboard(templates.followup_email_2)} 
+                  onRefine={() => handleRefineTemplate('followup_email_2')}
+                  isRefining={refiningKey === 'followup_email_2'}
+                  color="indigo" 
+                />
+                <TemplateCard 
+                  title="LinkedIn Outreach" 
+                  content={templates.linkedin_message} 
+                  onCopy={() => copyToClipboard(templates.linkedin_message)} 
+                  onRefine={() => handleRefineTemplate('linkedin_message')}
+                  isRefining={refiningKey === 'linkedin_message'}
+                  color="teal" 
+                />
+                <TemplateCard 
+                  title="Post-Interview Thank You" 
+                  content={templates.thank_you_email} 
+                  onCopy={() => copyToClipboard(templates.thank_you_email)} 
+                  onRefine={() => handleRefineTemplate('thank_you_email')}
+                  isRefining={refiningKey === 'thank_you_email'}
+                  color="emerald" 
+                />
+                <TemplateCard 
+                  title="Final Polite Close-Out" 
+                  content={templates.final_closeout} 
+                  onCopy={() => copyToClipboard(templates.final_closeout)} 
+                  onRefine={() => handleRefineTemplate('final_closeout')}
+                  isRefining={refiningKey === 'final_closeout'}
+                  color="slate" 
+                />
               </div>
             </div>
           )}
@@ -306,7 +376,7 @@ export const FollowUpAssistant: React.FC = () => {
   );
 };
 
-const TemplateCard = ({ title, content, onCopy, color }: any) => {
+const TemplateCard = ({ title, content, onCopy, onRefine, isRefining, color }: any) => {
   const colors = {
     blue: 'border-l-blue-500',
     indigo: 'border-l-indigo-500',
@@ -316,18 +386,25 @@ const TemplateCard = ({ title, content, onCopy, color }: any) => {
   };
 
   return (
-    <Card className={`border-l-4 ${colors[color]} shadow-md`}>
+    <Card className={`border-l-4 ${colors[color]} shadow-md group`}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-base">
           {title}
-          <Button variant="ghost" size="sm" onClick={onCopy} className="text-primary-600 hover:bg-primary-50">
-            <Copy className="h-4 w-4 mr-2" />
-            Copy
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={onRefine} isLoading={isRefining} className="text-slate-600 hover:bg-slate-100">
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefining ? 'animate-spin' : ''}`} />
+              Refine
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onCopy} className="text-primary-600 hover:bg-primary-50">
+              <Copy className="h-4 w-4 mr-2" />
+              Copy
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative rounded-xl bg-slate-50 p-4 border border-slate-100">
+        <div className="relative rounded-xl bg-slate-50 p-4 border border-slate-100 overflow-hidden">
+          {isRefining && <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center"><Spinner /></div>}
           <pre className="whitespace-pre-wrap font-sans text-sm font-medium text-slate-600 leading-relaxed">
             {content}
           </pre>

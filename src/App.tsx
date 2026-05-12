@@ -22,6 +22,8 @@ import { FollowUpAssistant } from './pages/FollowUpAssistant';
 import { Reminders } from './pages/Reminders';
 import { Settings } from './pages/Settings';
 
+import { JuniorJobHub } from './pages/JuniorJobHub';
+
 export default function App() {
   return (
     <AuthProvider>
@@ -48,6 +50,7 @@ export default function App() {
               <Route path="/applications" element={<Applications />} />
               <Route path="/applications/:id" element={<ApplicationDetail />} />
               <Route path="/ai-fit-analyzer" element={<AIFitAnalyzer />} />
+              <Route path="/junior-job-hub" element={<JuniorJobHub />} />
               <Route path="/company-research" element={<CompanyResearch />} />
               <Route path="/contact-finder" element={<ContactFinder />} />
               <Route path="/follow-up" element={<FollowUpAssistant />} />

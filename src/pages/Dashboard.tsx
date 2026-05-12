@@ -19,7 +19,8 @@ import {
   ChevronRight,
   TrendingUp,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Rocket
 } from 'lucide-react';
 import { useApplications } from '../hooks/useApplications';
 import { useReminders } from '../hooks/useReminders';
@@ -171,6 +172,12 @@ export const Dashboard: React.FC = () => {
                   label="Review recent applications" 
                   to="/applications" 
                   color="blue"
+                />
+                <ActionItem 
+                  icon={Rocket} 
+                  label="Find Junior IT Startup jobs" 
+                  to="/junior-job-hub" 
+                  color="indigo"
                 />
                 <ActionItem 
                   icon={CheckCircle2} 

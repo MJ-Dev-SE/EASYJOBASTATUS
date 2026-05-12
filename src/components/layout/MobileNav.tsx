@@ -29,6 +29,7 @@ export const MobileNav: React.FC = () => {
   };
 
   const moreItems = [
+    { to: '/junior-job-hub', label: 'Job Hub', icon: Briefcase },
     { to: '/company-research', label: 'Research', icon: Search },
     { to: '/contact-finder', label: 'Finder', icon: UserSearch },
     { to: '/follow-up', label: 'Follow-Up', icon: Mail },

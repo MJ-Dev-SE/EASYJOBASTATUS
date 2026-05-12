@@ -29,6 +29,7 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/applications', label: 'Applications', icon: Briefcase },
+    { to: '/junior-job-hub', label: 'Junior IT Job Board', icon: Trophy },
     { to: '/ai-fit-analyzer', label: 'AI Fit Analyzer', icon: FileSearch },
     { to: '/company-research', label: 'Company Research', icon: Search },
     { to: '/contact-finder', label: 'Contact Finder', icon: UserSearch },
